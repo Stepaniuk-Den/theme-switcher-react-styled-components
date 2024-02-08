@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/theme-switcher-react-styled-components/static/js/main.6faca15a.js",
+    "index.html": "/theme-switcher-react-styled-components/index.html",
+    "main.6faca15a.js.map": "/theme-switcher-react-styled-components/static/js/main.6faca15a.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.6faca15a.js"
+  ]
+}
