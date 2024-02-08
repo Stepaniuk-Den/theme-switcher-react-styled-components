@@ -1,70 +1,132 @@
-# Getting Started with Create React App
+Step 1: Setting Up the Project
+Create a new React project using Create React App:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+npx create-react-app theme-switcher
+cd theme-switcher
 
-## Available Scripts
+Install the styled-components package:
 
-In the project directory, you can run:
+npm install styled-components
 
-### `yarn start`
+Step 2: Defining the Themes
+Create a new folder named `themes` inside the `src` folder and create a file called `theme.js` inside it. Define your light and dark themes as objects with the necessary properties:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+// src/themes/theme.js
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+export const lightTheme = {
+background: '#F7F8FA',
+text: '#333333',
+};
 
-### `yarn test`
+export const darkTheme = {
+background: '#1D1E20',
+text: '#FFFFFF',
+};
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Step 3: Creating the ThemeContext
+Create a new folder named `contexts` inside the `src` folder and create a file called `ThemeContext.js` inside it. Set up the context and provider as follows:
 
-### `yarn build`
+// src/contexts/ThemeContext.js
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+import React, { createContext, useState } from 'react';
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+const ThemeContext = createContext();
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+const ThemeProvider = ({ children }) => {
+const [theme, setTheme] = useState('light');
 
-### `yarn eject`
+const toggleTheme = () => {
+setTheme(theme === 'light' ? 'dark' : 'light');
+};
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+return (
+<ThemeContext.Provider value={{ theme, toggleTheme }}>
+{children}
+</ThemeContext.Provider>
+);
+};
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+export { ThemeContext, ThemeProvider };
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Step 4: Integrating ThemeProvider into the Application
+In `src/index.js`, wrap the App component with the ThemeProvider:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+// src/index.js
 
-## Learn More
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
+import App from './App';
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+ReactDOM.render(
+<React.StrictMode>
+<ThemeProvider>
+<App />
+</ThemeProvider>
+</React.StrictMode>,
+document.getElementById('root')
+);
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Step 5: Creating Styled Components
+In `src/App.js`, import styled from `styled-components` and create a Wrapper component. Use the theme prop to set the styles dynamically:
 
-### Code Splitting
+// src/App.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+import React, { useContext } from 'react';
+import styled, { ThemeProvider } from 'styled-components';
+import { ThemeContext, lightTheme, darkTheme } from './themes/theme';
+import { GlobalStyles } from './themes/global';
 
-### Analyzing the Bundle Size
+//====Загальний контейнер має бути зразу після ThemeProvider //
+const Wrapper = styled.div`  
+  background-color: ${(props) => props.theme.background};
+  color: ${(props) => props.theme.text};
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;`;
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+function App() {
+const { theme, toggleTheme } = useContext(ThemeContext);
 
-### Making a Progressive Web App
+return (
+<ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
+<Wrapper>
+<GlobalStyles />
+<div>
+{/_ Пропсами прокидуємо {onClick} до потрібного рівня;
+{theme} щоб можна було будувати логіку _/}
+<button onClick={toggleTheme}>Switch Theme</button>
+<p>Color Text</p>
+</div>
+</Wrapper>
+</ThemeProvider>
+);
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+export default App;
 
-### Advanced Configuration
+Step 6: Adding Global Styles
+Create a file called `global.js` inside the `src/themes` folder and import `createGlobalStyle` from `styled-components`. Define the global styles as follows:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+// src/themes/global.js
 
-### Deployment
+import { createGlobalStyle } from 'styled-components';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+export const GlobalStyles = createGlobalStyle`  
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.25s linear;
+  }`;
 
-### `yarn build` fails to minify
+⚠️ Please Note ⚠️
+We're using `transition: all` property in the code example above, however, be aware that it can lead to unintended consequences and performance issues in your application. By applying transitions to all properties, any changes to an element's style will trigger a transition, even when it is not necessary or desired. This may result in excessive animations, poor user experience, and increased browser rendering workload.
+To avoid these potential issues, it is recommended to specify the exact properties you want to animate. For example, instead of using `transition: all`, explicitly define the properties like `background-color` and `color`:
+transition: background-color 0.25s linear, color 0.25s linear;
+By being more selective with transitions, you can ensure better control over the application's animations and avoid negative impacts on its performance.
+Now, your application has a working theme switcher that allows users to toggle between light and dark modes! You can customize the themes by adding more properties to the theme objects and creating additional styled-components.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Conclusion
+In this article, we’ve demonstrated how to build a dynamic theme switcher for a React application using Styled Components, Context API, and Hooks. This approach ensures a smooth user experience, allowing users to customize the appearance of your application according to their preferences. You can expand on this concept to create more complex and feature-rich theme switchers.
